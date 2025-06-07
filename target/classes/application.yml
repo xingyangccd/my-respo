@@ -8,6 +8,8 @@ spring:
     name: hd-chat
   profiles:
     active: dev
+  main:
+    allow-circular-references: true
   
   # Database Configuration
   datasource:

@@ -3,6 +3,7 @@ package com.xingyang.chat.security.service;
 import com.xingyang.chat.model.entity.User;
 import com.xingyang.chat.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserService userService;
 
-    public CustomUserDetailsService(UserService userService) {
+    public CustomUserDetailsService(@Lazy UserService userService) {
         this.userService = userService;
     }
 
