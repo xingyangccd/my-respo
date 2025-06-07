@@ -53,6 +53,13 @@ public class Result<T> implements Serializable {
     }
     
     /**
+     * Success response with message only
+     */
+    public static <T> Result<T> ok(String message) {
+        return new Result<>(ResultCode.SUCCESS.getCode(), message, null, System.currentTimeMillis());
+    }
+    
+    /**
      * Error response with message
      */
     public static <T> Result<T> error(String message) {
@@ -74,11 +81,19 @@ public class Result<T> implements Serializable {
     }
     
     /**
+     * Error response with message
+     */
+    public static <T> Result<T> fail(String message) {
+        return new Result<>(ResultCode.ERROR.getCode(), message, null, System.currentTimeMillis());
+    }
+    
+    /**
      * Response code enum
      */
     public enum ResultCode {
         SUCCESS(200, "Success"),
         ERROR(500, "Server Error"),
+        SYSTEM_ERROR(500, "System Error"),
         PARAM_ERROR(400, "Parameter Error"),
         UNAUTHORIZED(401, "Unauthorized"),
         FORBIDDEN(403, "Forbidden"),

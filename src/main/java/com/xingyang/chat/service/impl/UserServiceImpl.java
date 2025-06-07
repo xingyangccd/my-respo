@@ -105,16 +105,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Username already exists");
         }
         
+        // Check email format - must be QQ email
+        if (!registerDTO.getEmail().matches("^[1-9]\\d{4,}@qq\\.com$")) {
+            throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Please enter a valid QQ email address");
+        }
+        
+        // Check if email already exists
+        User existingEmail = lambdaQuery()
+                .eq(User::getEmail, registerDTO.getEmail())
+                .eq(User::getDeleted, 0)
+                .one();
+        if (existingEmail != null) {
+            throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Email already registered");
+        }
+        
         // Check if passwords match
         if (!Objects.equals(registerDTO.getPassword(), registerDTO.getConfirmPassword())) {
             throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Passwords do not match");
         }
         
+        // Check email verification code (handled in the controller)
+        // This will verify the email code:
+        // EmailService.verifyCode(registerDTO.getEmail(), registerDTO.getEmailCode());
+        // The controller should validate the code before this method is called
+        
         // Create new user
         User user = new User();
         user.setUsername(registerDTO.getUsername());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-        user.setNickname(registerDTO.getNickname());
+        user.setNickname(registerDTO.getNickname() != null ? registerDTO.getNickname() : registerDTO.getUsername());
         user.setEmail(registerDTO.getEmail());
         user.setPhone(registerDTO.getPhone());
         user.setStatus(1); // Enabled by default

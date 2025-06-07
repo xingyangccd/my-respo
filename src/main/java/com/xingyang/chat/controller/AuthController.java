@@ -5,6 +5,7 @@ import com.xingyang.chat.model.dto.RegisterDTO;
 import com.xingyang.chat.model.vo.Result;
 import com.xingyang.chat.model.vo.UserVO;
 import com.xingyang.chat.service.CaptchaService;
+import com.xingyang.chat.service.EmailService;
 import com.xingyang.chat.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +42,9 @@ public class AuthController {
     
     @Autowired
     private CaptchaService captchaService;
+    
+    @Autowired
+    private EmailService emailService;
 
     public AuthController(UserService userService) {
         this.userService = userService;
@@ -50,7 +54,6 @@ public class AuthController {
         summary = "User Login",
         description = "Login with username, password and captcha to get JWT token"
     )
-
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(schema = @Schema(implementation = Result.class))),
         @ApiResponse(responseCode = "400", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = Result.class))),
@@ -72,17 +75,28 @@ public class AuthController {
 
     @Operation(
         summary = "User Register",
-        description = "Register a new account with username, password, and email"
+        description = "Register a new account with username, password, email and verification code"
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Registration successful", content = @Content(schema = @Schema(implementation = Result.class))),
         @ApiResponse(responseCode = "400", description = "Invalid registration data", content = @Content(schema = @Schema(implementation = Result.class)))
     })
-
-
     @PostMapping("/register")
     public Result<UserVO> register(@Parameter(description = "Registration data", required = true) @Validated @RequestBody RegisterDTO registerDTO) {
         log.info("User registration: {}", registerDTO.getUsername());
+        
+        // Validate captcha
+        boolean isValidCaptcha = captchaService.validateCaptcha(registerDTO.getCaptchaUuid(), registerDTO.getCaptcha());
+        if (!isValidCaptcha) {
+            return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid captcha");
+        }
+        
+        // Validate email verification code
+        boolean isValidEmailCode = emailService.verifyCode(registerDTO.getEmail(), registerDTO.getEmailCode());
+        if (!isValidEmailCode) {
+            return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid or expired email verification code");
+        }
+        
         UserVO user = userService.register(registerDTO);
         return Result.success("Registration successful", user);
     }

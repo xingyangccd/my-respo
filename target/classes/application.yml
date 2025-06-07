@@ -60,6 +60,21 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+  # Mail Configuration
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 3266303694@qq.com
+    password: xamejnfkwmylcgji
+    nickname: AI Assistant
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 # MyBatis Plus Configuration
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

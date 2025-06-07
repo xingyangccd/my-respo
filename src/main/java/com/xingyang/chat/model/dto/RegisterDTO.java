@@ -20,29 +20,45 @@ public class RegisterDTO implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "Username", required = true)
+    @Schema(description = "Username", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Username cannot be empty")
     @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
     @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Username can only contain letters, numbers, underscores and hyphens")
     private String username;
 
-    @Schema(description = "Password", required = true)
+    @Schema(description = "Password", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Password cannot be empty")
     @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
     private String password;
 
-    @Schema(description = "Confirm password", required = true)
+    @Schema(description = "Confirm password", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Confirm password cannot be empty")
     private String confirmPassword;
 
     @Schema(description = "Nickname")
     private String nickname;
 
-    @Schema(description = "Email")
+    @Schema(description = "Email", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Email cannot be empty")
     @Email(message = "Invalid email format")
+    @Pattern(regexp = "^[1-9]\\d{4,}@qq\\.com$", message = "Please enter a valid QQ email address")
     private String email;
+
+    @Schema(description = "Email verification code", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Email verification code cannot be empty")
+    @Size(min = 6, max = 6, message = "Email verification code must be 6 digits")
+    @Pattern(regexp = "^\\d{6}$", message = "Email verification code must contain only digits")
+    private String emailCode;
 
     @Schema(description = "Phone number")
     @Pattern(regexp = "^$|^1[3-9]\\d{9}$", message = "Invalid phone number format")
     private String phone;
+    
+    @Schema(description = "Captcha", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Captcha cannot be empty")
+    private String captcha;
+
+    @Schema(description = "Captcha UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Captcha UUID cannot be empty")
+    private String captchaUuid;
 }
