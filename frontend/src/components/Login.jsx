@@ -7,22 +7,45 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   
   const onFinish = async (values) => {
+    console.log('Form values submitted:', values); // Debug log
     try {
       setLoading(true);
+      console.log('Calling authService.login...');
       const response = await authService.login(values);
-      message.success('登录成功');
+      console.log('Login API response:', response);
+      message.success('Login successful');
       
-      // 登录成功后，重定向到主页或其他页面
+      // Redirect to homepage after successful login
       setTimeout(() => {
         window.location.href = '/chat';
       }, 1000);
-      
-      console.log('Login successful:', response);
     } catch (error) {
-      console.error('Login error:', error);
-      // 错误处理在 http 拦截器中已经完成
+      console.error('Login error details:', error);
+      // Display specific error message
+      message.error(`Login failed: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Debug function to test direct API call
+  const testDirectApiCall = async () => {
+    try {
+      console.log('Testing direct API call...');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: 'testuser',
+          password: 'testpassword'
+        })
+      });
+      const data = await response.json();
+      console.log('Direct API call response:', data);
+    } catch (error) {
+      console.error('Direct API call error:', error);
     }
   };
 
@@ -35,7 +58,7 @@ const Login = () => {
       background: '#f0f2f5'
     }}>
       <Card
-        title="HD Chat 登录"
+        title="HD Chat Login"
         style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
       >
         <Form
@@ -45,22 +68,22 @@ const Login = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: '请输入用户名!' }]}
+            rules={[{ required: true, message: 'Please enter your username!' }]}
           >
             <Input 
               prefix={<UserOutlined />} 
-              placeholder="用户名" 
+              placeholder="Username" 
               size="large"
             />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: '请输入密码!' }]}
+            rules={[{ required: true, message: 'Please enter your password!' }]}
           >
             <Input.Password 
               prefix={<LockOutlined />} 
-              placeholder="密码" 
+              placeholder="Password" 
               size="large" 
             />
           </Form.Item>
@@ -73,12 +96,23 @@ const Login = () => {
               size="large"
               loading={loading}
             >
-              登录
+              Login
             </Button>
           </Form.Item>
           
           <div style={{ textAlign: 'center' }}>
-            <a href="/register">没有账号? 立即注册</a>
+            <a href="/register">Don't have an account? Register now</a>
+          </div>
+
+          {/* Debug button to test API directly */}
+          <div style={{ marginTop: '20px' }}>
+            <Button 
+              type="link" 
+              onClick={testDirectApiCall}
+              style={{ padding: 0, height: 'auto', fontSize: '12px', color: '#999' }}
+            >
+              Test API Call
+            </Button>
           </div>
         </Form>
       </Card>

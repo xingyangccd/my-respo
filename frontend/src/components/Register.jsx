@@ -10,15 +10,15 @@ const Register = () => {
     try {
       setLoading(true);
       await authService.register(values);
-      message.success('注册成功，请登录');
+      message.success('Registration successful, please login');
       
-      // 注册成功后，重定向到登录页面
+      // Redirect to login page after successful registration
       setTimeout(() => {
         window.location.href = '/login';
       }, 1500);
     } catch (error) {
       console.error('Registration error:', error);
-      // 错误处理在 http 拦截器中已经完成
+      // Error handling is done in http interceptor
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ const Register = () => {
       background: '#f0f2f5'
     }}>
       <Card
-        title="HD Chat 注册"
+        title="HD Chat Registration"
         style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
       >
         <Form
@@ -43,14 +43,14 @@ const Register = () => {
           <Form.Item
             name="username"
             rules={[
-              { required: true, message: '请输入用户名!' },
-              { min: 3, message: '用户名至少3个字符' },
-              { max: 20, message: '用户名最多20个字符' }
+              { required: true, message: 'Please enter a username!' },
+              { min: 3, message: 'Username must be at least 3 characters' },
+              { max: 20, message: 'Username cannot exceed 20 characters' }
             ]}
           >
             <Input 
               prefix={<UserOutlined />} 
-              placeholder="用户名" 
+              placeholder="Username" 
               size="large" 
             />
           </Form.Item>
@@ -58,13 +58,13 @@ const Register = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: '请输入邮箱!' },
-              { type: 'email', message: '请输入有效的邮箱地址!' }
+              { required: true, message: 'Please enter an email address!' },
+              { type: 'email', message: 'Please enter a valid email address!' }
             ]}
           >
             <Input 
               prefix={<MailOutlined />} 
-              placeholder="邮箱" 
+              placeholder="Email" 
               size="large" 
             />
           </Form.Item>
@@ -72,14 +72,14 @@ const Register = () => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: '请输入密码!' },
-              { min: 6, message: '密码至少6个字符' }
+              { required: true, message: 'Please enter a password!' },
+              { min: 6, message: 'Password must be at least 6 characters' }
             ]}
             hasFeedback
           >
             <Input.Password 
               prefix={<LockOutlined />} 
-              placeholder="密码" 
+              placeholder="Password" 
               size="large" 
             />
           </Form.Item>
@@ -89,20 +89,20 @@ const Register = () => {
             dependencies={['password']}
             hasFeedback
             rules={[
-              { required: true, message: '请确认密码!' },
+              { required: true, message: 'Please confirm your password!' },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('两次输入的密码不一致!'));
+                  return Promise.reject(new Error('The two passwords do not match!'));
                 },
               }),
             ]}
           >
             <Input.Password 
               prefix={<LockOutlined />} 
-              placeholder="确认密码" 
+              placeholder="Confirm Password" 
               size="large"
             />
           </Form.Item>
@@ -115,12 +115,12 @@ const Register = () => {
               size="large"
               loading={loading}
             >
-              注册
+              Register
             </Button>
           </Form.Item>
           
           <div style={{ textAlign: 'center' }}>
-            <a href="/login">已有账号? 立即登录</a>
+            <a href="/login">Already have an account? Login now</a>
           </div>
         </Form>
       </Card>

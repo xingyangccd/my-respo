@@ -1,41 +1,70 @@
 import http from '../utils/http';
 
 /**
- * 用户认证服务
+ * Authentication Service
  */
 const authService = {
   /**
-   * 用户登录
-   * @param {Object} data - 登录参数
-   * @param {string} data.username - 用户名
-   * @param {string} data.password - 密码
-   * @returns {Promise<Object>} 登录结果，包含token和用户信息
+   * User Login
+   * @param {Object} data - Login parameters
+   * @param {string} data.username - Username
+   * @param {string} data.password - Password
+   * @returns {Promise<Object>} Login result with token and user info
    */
   login: async (data) => {
+    console.log('authService.login called with:', { username: data.username, password: '******' });
     try {
-      const response = await http.post('/auth/login', data);
-      // 保存token到本地存储
-      if (response && response.token) {
-        localStorage.setItem('token', response.token);
+      // Use native axios for debugging, bypassing http interceptor
+      console.log('Sending direct axios request to /api/auth/login');
+      const directResponse = await http.post('/auth/login', data, {
+        transformResponse: [(data) => {
+          // Don't automatically parse JSON to see raw response
+          console.log('Raw response data:', data);
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            return data;
+          }
+        }]
+      });
+      console.log('Direct response received:', directResponse);
+
+      const { data: responseData } = directResponse;
+      console.log('Response data structure:', responseData);
+      
+      // Check if token exists
+      if (responseData && responseData.data && responseData.data.token) {
+        const token = responseData.data.token;
+        console.log('Token received, saving to localStorage');
+        localStorage.setItem('token', token);
+      } else if (responseData && responseData.token) {
+        console.log('Token directly in response, saving to localStorage');
+        localStorage.setItem('token', responseData.token);
+      } else {
+        console.warn('No token found in response:', responseData);
       }
-      return response;
+      
+      return responseData.data || responseData;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login request failed:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error request config:', error.config);
       throw error;
     }
   },
 
   /**
-   * 用户注册
-   * @param {Object} data - 注册参数
-   * @param {string} data.username - 用户名
-   * @param {string} data.password - 密码
-   * @param {string} data.email - 邮箱
-   * @returns {Promise<Object>} 注册结果，包含用户信息
+   * User Registration
+   * @param {Object} data - Registration parameters
+   * @param {string} data.username - Username
+   * @param {string} data.password - Password
+   * @param {string} data.email - Email
+   * @returns {Promise<Object>} Registration result with user info
    */
   register: async (data) => {
     try {
       const response = await http.post('/auth/register', data);
+      console.log('Registration response:', response);
       return response;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -44,8 +73,8 @@ const authService = {
   },
 
   /**
-   * 获取当前用户信息
-   * @returns {Promise<Object>} 用户信息
+   * Get current user information
+   * @returns {Promise<Object>} User information
    */
   getCurrentUser: async () => {
     try {
@@ -57,17 +86,17 @@ const authService = {
   },
 
   /**
-   * 退出登录
+   * Logout the current user
    */
   logout: () => {
     localStorage.removeItem('token');
-    // 可以在这里执行重定向到登录页面
+    // Redirect to login page
     window.location.href = '/login';
   },
 
   /**
-   * 检查用户是否已登录
-   * @returns {boolean} 是否已登录
+   * Check if user is authenticated
+   * @returns {boolean} Whether user is authenticated
    */
   isAuthenticated: () => {
     return !!localStorage.getItem('token');

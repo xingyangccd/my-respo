@@ -27,14 +27,14 @@ http.interceptors.request.use(
 // Response interceptor for API calls
 http.interceptors.response.use(
   (response) => {
-    // 从 Result<T> 中获取业务数据
+    // Extract business data from Result<T> wrapper
     const { code, message: msg, data } = response.data;
     
     if (code === 200 || code === 0) {
       return data;
     } else {
-      message.error(msg || '请求失败');
-      return Promise.reject(new Error(msg || '请求失败'));
+      message.error(msg || 'Request failed');
+      return Promise.reject(new Error(msg || 'Request failed'));
     }
   },
   (error) => {
@@ -43,24 +43,24 @@ http.interceptors.response.use(
       
       switch (status) {
         case 401:
-          message.error('登录已过期，请重新登录');
+          message.error('Login expired, please log in again');
           localStorage.removeItem('token');
-          // 可以在这里执行重定向到登录页面
+          // Redirect to login page
           window.location.href = '/login';
           break;
         case 403:
-          message.error('没有权限访问此资源');
+          message.error('No permission to access this resource');
           break;
         case 500:
-          message.error('服务器错误，请稍后再试');
+          message.error('Server error, please try again later');
           break;
         default:
-          message.error(error.response.data.message || '未知错误');
+          message.error(error.response.data.message || 'Unknown error');
       }
     } else if (error.request) {
-      message.error('网络错误，请检查您的网络连接');
+      message.error('Network error, please check your connection');
     } else {
-      message.error('请求错误: ' + error.message);
+      message.error('Request error: ' + error.message);
     }
     return Promise.reject(error);
   }
