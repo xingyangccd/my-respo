@@ -100,7 +100,7 @@ logging:
 knife4j:
   enable: true
   setting:
-    language: en-US
+    language: en
     enable-swagger-models: true
     enable-document-manage: true
     swagger-model-name: Models
@@ -112,30 +112,4 @@ knife4j:
     enable-host-text: http://localhost:8080
     enable-debug: true
     enable-filter-multipart-api-method-type: POST
-    enable-after-script: true
-
-# MinIO Configuration
-minio:
-  endpoint: http://localhost:9000
-  accessKey: minioadmin
-  secretKey: minioadmin
-  bucketName: hd-chat
-
-# Logging Configuration
-logging:
-  level:
-    com.xingyang.chat: debug
-    org.springframework.web: info
-    org.springframework.security: info
-
-# Knife4j API Documentation
-knife4j:
-  enable: true
-  setting:
-    language: zh-CN
-    enable-swagger-models: true
-    enable-document-manage: true
-    swagger-model-name: 实体类列表
-    enable-version: false
-    enable-footer: false
-    enable-footer-custom: false 
+    enable-after-script: true 

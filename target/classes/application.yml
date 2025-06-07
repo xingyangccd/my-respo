@@ -16,7 +16,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/hd_chat?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
-    password: xy666666
+    password: 123456
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -27,7 +27,7 @@ spring:
   # Redis Configuration
   redis:
     host: localhost
-    port: 6380
+    port: 6379
     database: 0
     timeout: 10000
     lettuce:
@@ -100,10 +100,16 @@ logging:
 knife4j:
   enable: true
   setting:
-    language: zh-CN
+    language: en
     enable-swagger-models: true
     enable-document-manage: true
-    swagger-model-name: 实体类列表
+    swagger-model-name: Models
     enable-version: false
     enable-footer: false
-    enable-footer-custom: false 
+    enable-footer-custom: false
+    enable-request-cache: true
+    enable-host: false
+    enable-host-text: http://localhost:8080
+    enable-debug: true
+    enable-filter-multipart-api-method-type: POST
+    enable-after-script: true 
