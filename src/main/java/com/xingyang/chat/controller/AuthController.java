@@ -32,7 +32,7 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "Authentication API", description = "Authentication endpoints for login, registration, and user information")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 public class AuthController {
 
     private final UserService userService;
@@ -45,6 +45,7 @@ public class AuthController {
         summary = "User Login",
         description = "Login with username and password to get JWT token"
     )
+
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(schema = @Schema(implementation = Result.class))),
         @ApiResponse(responseCode = "400", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = Result.class))),
@@ -65,6 +66,8 @@ public class AuthController {
         @ApiResponse(responseCode = "200", description = "Registration successful", content = @Content(schema = @Schema(implementation = Result.class))),
         @ApiResponse(responseCode = "400", description = "Invalid registration data", content = @Content(schema = @Schema(implementation = Result.class)))
     })
+
+
     @PostMapping("/register")
     public Result<UserVO> register(@Parameter(description = "Registration data", required = true) @Validated @RequestBody RegisterDTO registerDTO) {
         log.info("User registration: {}", registerDTO.getUsername());

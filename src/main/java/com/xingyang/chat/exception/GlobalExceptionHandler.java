@@ -83,11 +83,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Result<Void> handleAuthenticationException(AuthenticationException e) {
-        log.error("Authentication failed: {}", e.getMessage(), e);
-        String message = "Authentication failed";
+        // For BadCredentialsException, just log simple info without stack trace
         if (e instanceof BadCredentialsException) {
-            message = "Invalid username or password";
+            log.info("Authentication failed: Invalid username or password");
+            return Result.error(Result.ResultCode.UNAUTHORIZED.getCode(), "Invalid username or password");
         }
+        
+        // For other authentication exceptions, log with details
+        log.error("Authentication failed: {}", e.getMessage());
+        String message = "Authentication failed";
         return Result.error(Result.ResultCode.UNAUTHORIZED.getCode(), message);
     }
 

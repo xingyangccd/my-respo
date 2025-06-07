@@ -47,11 +47,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         
         // Get user roles and convert to authorities
-        List<GrantedAuthority> authorities = null;
-        if (user.getRoles() != null) {
+        List<GrantedAuthority> authorities;
+        if (user.getRoles() != null && user.getRoles().length > 0) {
             authorities = Arrays.stream(user.getRoles())
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
+        } else {
+            // 添加默认用户权限
+            authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
         
         // Create and return UserDetails

@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -40,19 +41,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
-    public UserServiceImpl(@Lazy AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(@Lazy AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, PasswordEncoder passwordEncoder, JdbcTemplate jdbcTemplate) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.passwordEncoder = passwordEncoder;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public User getUserByUsername(String username) {
-        return lambdaQuery()
+        User user = lambdaQuery()
                 .eq(User::getUsername, username)
                 .eq(User::getDeleted, 0)
                 .one();
+        
+        // 如果找到用户，加载角色信息
+        if (user != null) {
+            // 获取用户角色
+            String[] roles = baseMapper.getUserRoles(user.getId());
+            user.setRoles(roles != null && roles.length > 0 ? roles : new String[]{"USER"});
+        }
+        
+        return user;
     }
 
     @Override
@@ -109,6 +121,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         
         // Save user
         save(user);
+        
+        try {
+            // 为新用户分配默认USER角色
+            jdbcTemplate.update(
+                "INSERT INTO user_role (user_id, role_id, create_time, update_time) " +
+                "VALUES (?, (SELECT id FROM role WHERE code = 'USER' AND deleted = 0 LIMIT 1), NOW(), NOW())",
+                user.getId());
+        } catch (Exception e) {
+            log.error("Failed to assign default role to user: {}", e.getMessage());
+        }
+        
+        // 设置返回值中的角色信息
+        user.setRoles(new String[]{"USER"});
         
         // Convert to UserVO
         UserVO userVO = new UserVO();
