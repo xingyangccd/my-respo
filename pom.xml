@@ -26,6 +26,7 @@
         <minio.version>8.5.4</minio.version>
         <knife4j.version>4.1.0</knife4j.version>
         <spring-cloud.version>2021.0.7</spring-cloud.version>
+        <lombok.version>1.18.30</lombok.version>
     </properties>
     
     <dependencies>
@@ -106,6 +107,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -179,6 +181,13 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
