@@ -112,4 +112,16 @@ knife4j:
     enable-host-text: http://localhost:8080
     enable-debug: true
     enable-filter-multipart-api-method-type: POST
-    enable-after-script: true 
+    enable-after-script: true
+
+# SpringDoc Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+  packages-to-scan: com.xingyang.chat.controller
+  paths-to-match: /** 

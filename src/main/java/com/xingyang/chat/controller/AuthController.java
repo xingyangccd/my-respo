@@ -6,6 +6,13 @@ import com.xingyang.chat.model.vo.Result;
 import com.xingyang.chat.model.vo.UserVO;
 import com.xingyang.chat.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +30,7 @@ import java.util.Map;
  * @author XingYang
  */
 @Slf4j
-@Tag(name = "Authentication API", description = "Authentication endpoints")
+@Tag(name = "Authentication API", description = "Authentication endpoints for login, registration, and user information")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -34,23 +41,45 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @Operation(summary = "User Login", description = "Login with username and password")
+    @Operation(
+        summary = "User Login",
+        description = "Login with username and password to get JWT token"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(schema = @Schema(implementation = Result.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = Result.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Result.class)))
+    })
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@Validated @RequestBody LoginDTO loginDTO) {
+    public Result<Map<String, Object>> login(@Parameter(description = "Login credentials", required = true) @Validated @RequestBody LoginDTO loginDTO) {
         log.info("User login: {}", loginDTO.getUsername());
         Map<String, Object> result = userService.login(loginDTO);
         return Result.success("Login successful", result);
     }
 
-    @Operation(summary = "User Register", description = "Register a new account")
+    @Operation(
+        summary = "User Register",
+        description = "Register a new account with username, password, and email"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Registration successful", content = @Content(schema = @Schema(implementation = Result.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid registration data", content = @Content(schema = @Schema(implementation = Result.class)))
+    })
     @PostMapping("/register")
-    public Result<UserVO> register(@Validated @RequestBody RegisterDTO registerDTO) {
+    public Result<UserVO> register(@Parameter(description = "Registration data", required = true) @Validated @RequestBody RegisterDTO registerDTO) {
         log.info("User registration: {}", registerDTO.getUsername());
         UserVO user = userService.register(registerDTO);
         return Result.success("Registration successful", user);
     }
 
-    @Operation(summary = "Current User", description = "Get current user information")
+    @Operation(
+        summary = "Current User",
+        description = "Get information about the current authenticated user"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "User information retrieved successfully", content = @Content(schema = @Schema(implementation = Result.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Result.class)))
+    })
     @GetMapping("/user")
     public Result<UserVO> getCurrentUser() {
         log.info("Get current user information");
