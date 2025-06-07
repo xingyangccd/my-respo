@@ -29,7 +29,7 @@ public class Model extends BaseEntity {
     private String endpoint;
     
     @Schema(description = "Model version")
-    private String version;
+    private String modelVersion;
     
     @Schema(description = "Token limitation")
     private Integer tokenLimit;
