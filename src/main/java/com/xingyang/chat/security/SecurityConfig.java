@@ -1,13 +1,16 @@
 package com.xingyang.chat.security;
 
 import com.xingyang.chat.security.filter.JwtAuthenticationFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,7 @@ import java.util.Arrays;
  *
  * @author XingYang
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -40,11 +44,36 @@ public class SecurityConfig {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
+    
+    /**
+     * Completely ignore security for specific paths
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        log.info("Configuring web security to ignore certain paths");
+        return (web) -> {
+            web.ignoring()
+               .antMatchers(
+                   "/captcha/**",  
+                   "/doc.html", 
+                   "/swagger-ui/**", 
+                   "/swagger-resources/**", 
+                   "/v3/api-docs/**", 
+                   "/webjars/**"
+               );
+            log.info("Web security configured to ignore paths: [/captcha/**, /doc.html, /swagger-ui/**, etc]");
+        };
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable()
+        log.info("Configuring Spring Security filter chain");
+        
+        // Explicitly permit captcha endpoints first
+        http.authorizeRequests()
+            .antMatchers("/captcha/**").permitAll();
+        
+        http.csrf().disable()
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .exceptionHandling()
@@ -55,14 +84,18 @@ public class SecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/api/auth/**", "/api/register").permitAll()
-            .antMatchers("/doc.html", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**", "/webjars/**").permitAll()
-            .antMatchers("/api/public/**").permitAll()
+            // Public endpoints - no authentication required
+            .antMatchers("/captcha/**").permitAll() // Duplicate for emphasis
+            .antMatchers("/auth/**").permitAll()
+            .antMatchers("/register").permitAll()
+            .antMatchers("/public/**").permitAll()
+            // All other endpoints require authentication
             .anyRequest().authenticated();
 
-        // Add JWT filter
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+        
+        log.info("Spring Security filter chain configured successfully");
         return http.build();
     }
 
@@ -79,11 +112,11 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

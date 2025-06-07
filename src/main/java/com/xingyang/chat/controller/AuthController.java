@@ -4,6 +4,7 @@ import com.xingyang.chat.model.dto.LoginDTO;
 import com.xingyang.chat.model.dto.RegisterDTO;
 import com.xingyang.chat.model.vo.Result;
 import com.xingyang.chat.model.vo.UserVO;
+import com.xingyang.chat.service.CaptchaService;
 import com.xingyang.chat.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,9 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    
+    @Autowired
+    private CaptchaService captchaService;
 
     public AuthController(UserService userService) {
         this.userService = userService;
@@ -43,7 +48,7 @@ public class AuthController {
 
     @Operation(
         summary = "User Login",
-        description = "Login with username and password to get JWT token"
+        description = "Login with username, password and captcha to get JWT token"
     )
 
     @ApiResponses({
@@ -54,6 +59,13 @@ public class AuthController {
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Parameter(description = "Login credentials", required = true) @Validated @RequestBody LoginDTO loginDTO) {
         log.info("User login: {}", loginDTO.getUsername());
+        
+        // Validate captcha
+        boolean isValidCaptcha = captchaService.validateCaptcha(loginDTO.getCaptchaUuid(), loginDTO.getCaptcha());
+        if (!isValidCaptcha) {
+            return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid captcha");
+        }
+        
         Map<String, Object> result = userService.login(loginDTO);
         return Result.success("Login successful", result);
     }

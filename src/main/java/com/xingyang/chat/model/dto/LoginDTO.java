@@ -17,14 +17,22 @@ public class LoginDTO implements Serializable {
     
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "Username", required = true)
+    @Schema(description = "Username", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Username cannot be empty")
     private String username;
 
-    @Schema(description = "Password", required = true)
+    @Schema(description = "Password", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
     @Schema(description = "Remember me")
     private Boolean rememberMe = false;
+    
+    @Schema(description = "Captcha verification code", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Captcha cannot be empty")
+    private String captcha;
+    
+    @Schema(description = "Captcha UUID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "Captcha UUID cannot be empty")
+    private String captchaUuid;
 } 

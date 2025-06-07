@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -13,6 +14,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * JWT Authentication Filter
@@ -26,10 +29,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
     
+    // List of paths that should skip token validation
+    private static final List<String> PUBLIC_PATHS = Arrays.asList(
+        "/captcha/**",
+        "/auth/**",
+        "/register",
+        "/doc.html",
+        "/swagger-ui/**",
+        "/swagger-resources/**",
+        "/v3/api-docs/**",
+        "/webjars/**"
+    );
+    
     private final JwtTokenUtil jwtTokenUtil;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestPath = request.getRequestURI();
+        
+        // Check if the request path matches any of the public paths
+        boolean isPublicPath = PUBLIC_PATHS.stream()
+            .anyMatch(pattern -> pathMatcher.match(pattern, requestPath));
+        
+        if (isPublicPath) {
+            log.debug("Skipping JWT authentication for public path: {}", requestPath);
+        }
+        
+        return isPublicPath;
     }
 
     @Override
