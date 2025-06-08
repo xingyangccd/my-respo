@@ -9,50 +9,50 @@ import org.springframework.context.annotation.Bean;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 
+/**
+ * AI Model Configuration
+ * 
+ * @author xingyang
+ */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "ai.model")
 public class AiModelConfig {
 
     /**
-     * 阿里云百联API密钥
+     * Alibaba Bailing API key
      */
     private String apiKey;
     
     /**
-     * 模型ID，默认为千问模型
+     * Model ID, default is Qwen-plus
      */
     private String modelId = "qwen-plus";
     
     /**
-     * API端点
+     * API endpoint
      */
     private String endpoint = "https://dashscope.aliyuncs.com/compatible-mode/v1";
     
     /**
-     * 最大令牌数
+     * Maximum tokens for generation
      */
     private Integer maxTokens = 4000;
     
     /**
-     * 温度参数，控制回答的随机性
+     * Temperature parameter, controls randomness
      */
     private Double temperature = 0.7;
     
     /**
-     * 配置OpenAI格式的聊天模型Bean
-     * 使用兼容OpenAI接口的阿里云服务
+     * Configure OpenAI format chat model bean
+     * Using Alibaba Cloud service with OpenAI compatible interface
      */
     @Bean
     public ChatLanguageModel chatLanguageModel() {
-        return OpenAiChatModel.builder()
-                .baseUrl(endpoint)
-                .apiKey(apiKey)
-                .modelName(modelId)
-                .temperature(temperature)
-                .maxTokens(maxTokens)
-                .logRequests(true)
-                .logResponses(true)
-                .build();
+        // Create a dummy implementation that will be replaced by direct API calls
+        return messages -> {
+            throw new UnsupportedOperationException("This is a placeholder implementation. Use direct API calls instead.");
+        };
     }
 } 

@@ -7,14 +7,14 @@ spring:
   application:
     name: hd-chat
   profiles:
-    active: dev
+    active: prod
   main:
     allow-circular-references: true
   
   # Database Configuration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/hd_chat?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://45.207.192.41:3306/hd_chat?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: xy666666
     hikari:
@@ -26,7 +26,7 @@ spring:
   
   # Redis Configuration
   redis:
-    host: localhost
+    host: 45.207.192.41
     port: 6379
     database: 0
     timeout: 10000
@@ -40,7 +40,7 @@ spring:
   
   # RabbitMQ Configuration
   rabbitmq:
-    host: localhost
+    host: 45.207.192.41
     port: 5672
     username: guest
     password: guest
@@ -82,7 +82,7 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
   global-config:
     db-config:
       id-type: auto
@@ -100,7 +100,7 @@ jwt:
 
 # MinIO Configuration
 minio:
-  endpoint: http://localhost:9000
+  endpoint: http://45.207.192.41:9000
   accessKey: minio
   secretKey: minio123
   bucketName: ai-pan
@@ -109,9 +109,11 @@ minio:
 # Logging Configuration
 logging:
   level:
-    com.xingyang.chat: debug
-    org.springframework.web: info
-    org.springframework.security: info
+    com.xingyang.chat: info
+    org.springframework.web: warn
+    org.springframework.security: warn
+    org.hibernate.SQL: warn
+    org.mybatis: warn
 
 # Knife4j API Documentation
 knife4j:
@@ -126,7 +128,7 @@ knife4j:
     enable-footer-custom: false
     enable-request-cache: true
     enable-host: false
-    enable-host-text: http://localhost:8080
+    enable-host-text: http://45.207.192.41:8080
     enable-debug: true
     enable-filter-multipart-api-method-type: POST
     enable-after-script: true
@@ -142,3 +144,12 @@ springdoc:
     operationsSorter: method
   packages-to-scan: com.xingyang.chat.controller
   paths-to-match: /** 
+
+# AI Model configuration
+ai:
+  model:
+    api-key: sk-ce3f379d410f424a83b3ecc26d7e7e9d
+    model-id: qwen-plus
+    endpoint: https://dashscope.aliyuncs.com/compatible-mode/v1
+    max-tokens: 4000
+    temperature: 0.7 

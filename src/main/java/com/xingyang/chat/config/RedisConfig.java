@@ -21,6 +21,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Redis Configuration
@@ -87,21 +89,31 @@ public class RedisConfig {
         return template;
     }
 
+    /**
+     * Configure Redis cache manager with custom TTL for different cache names
+     */
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
         log.info("Initializing Redis cache manager");
         RedisSerializer<String> redisSerializer = new StringRedisSerializer();
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = getJackson2JsonRedisSerializer();
         
-        // Configure cache serialization
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1)) // TTL for cache entries
+        // Configure default cache properties
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1)) // Default TTL for cache entries
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
                 .disableCachingNullValues();
         
+        // Configure custom TTL for different cache names
+        Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
+        configMap.put("chatCache", defaultConfig.entryTtl(Duration.ofMinutes(5))); // 5 minutes for chat cache
+        configMap.put("userCache", defaultConfig.entryTtl(Duration.ofHours(24))); // 24 hours for user cache
+        configMap.put("messageCache", defaultConfig.entryTtl(Duration.ofMinutes(30))); // 30 minutes for message cache
+        
         RedisCacheManager cacheManager = RedisCacheManager.builder(factory)
-                .cacheDefaults(config)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(configMap)
                 .build();
         
         log.info("Redis cache manager initialized successfully");

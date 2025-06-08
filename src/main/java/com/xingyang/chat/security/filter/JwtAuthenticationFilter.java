@@ -68,18 +68,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
+            log.debug("Processing request: {} {}", request.getMethod(), request.getRequestURI());
             String jwt = resolveToken(request);
             
-            if (StringUtils.hasText(jwt) && jwtTokenUtil.validateToken(jwt)) {
-                // Get authentication object from JWT token
-                Authentication authentication = jwtTokenUtil.getAuthentication(jwt);
+            if (StringUtils.hasText(jwt)) {
+                log.debug("JWT token found in request");
                 
-                // Set authentication in context
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("Set Authentication to security context for '{}', uri: {}", authentication.getName(), request.getRequestURI());
+                if (jwtTokenUtil.validateToken(jwt)) {
+                    log.debug("JWT token is valid");
+                    
+                    // Get authentication object from JWT token
+                    Authentication authentication = jwtTokenUtil.getAuthentication(jwt);
+                    
+                    // Set authentication in context
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.debug("Set Authentication to security context for '{}', uri: {}", 
+                            authentication.getName(), request.getRequestURI());
+                    
+                    // 尝试获取用户ID（可选，仅用于日志）
+                    try {
+                        Long userId = jwtTokenUtil.getUserIdFromToken("Bearer " + jwt);
+                        log.debug("User ID from token: {}", userId);
+                    } catch (Exception e) {
+                        log.warn("Could not extract user ID from token", e);
+                    }
+                } else {
+                    log.warn("Invalid JWT token");
+                }
+            } else {
+                log.debug("No JWT token found in request");
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    log.debug("No authentication found in security context");
+                } else {
+                    log.debug("Authentication already exists in security context: {}", 
+                            SecurityContextHolder.getContext().getAuthentication());
+                }
             }
         } catch (Exception e) {
             log.error("Cannot set user authentication: {}", e.getMessage(), e);
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

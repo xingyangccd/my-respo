@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * Standard API Response Structure
+ * Unified API response object
  * 
- * @author XingYang
+ * @author xingyang
  */
 @Data
 @NoArgsConstructor
@@ -19,9 +19,9 @@ public class Result<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Status code
+     * Response code, 200 for success
      */
-    private Integer code;
+    private int code;
     
     /**
      * Response message
@@ -34,15 +34,42 @@ public class Result<T> implements Serializable {
     private T data;
     
     /**
-     * Timestamp
+     * Timestamp of the response
      */
     private long timestamp;
     
     /**
-     * Success response with data
+     * 重写toString方法用于调试
+     */
+    @Override
+    public String toString() {
+        return "Result{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                ", data=" + (data == null ? "null" : data.toString()) +
+                ", timestamp=" + timestamp +
+                '}';
+    }
+    
+    /**
+     * Create a successful response with data
+     *
+     * @param data response data
+     * @param <T> data type
+     * @return Result object
      */
     public static <T> Result<T> success(T data) {
         return new Result<>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), data, System.currentTimeMillis());
+    }
+    
+    /**
+     * Create a successful response without data
+     *
+     * @param <T> data type
+     * @return Result object
+     */
+    public static <T> Result<T> success() {
+        return success(null);
     }
     
     /**
@@ -60,17 +87,22 @@ public class Result<T> implements Serializable {
     }
     
     /**
+     * Create an error response
+     *
+     * @param code error code
+     * @param message error message
+     * @param <T> data type
+     * @return Result object
+     */
+    public static <T> Result<T> error(int code, String message) {
+        return new Result<>(code, message, null, System.currentTimeMillis());
+    }
+    
+    /**
      * Error response with message
      */
     public static <T> Result<T> error(String message) {
         return new Result<>(ResultCode.ERROR.getCode(), message, null, System.currentTimeMillis());
-    }
-    
-    /**
-     * Error response with code and message
-     */
-    public static <T> Result<T> error(Integer code, String message) {
-        return new Result<>(code, message, null, System.currentTimeMillis());
     }
     
     /**
@@ -85,6 +117,19 @@ public class Result<T> implements Serializable {
      */
     public static <T> Result<T> fail(String message) {
         return new Result<>(ResultCode.ERROR.getCode(), message, null, System.currentTimeMillis());
+    }
+    
+    /**
+     * Create an error response with data
+     *
+     * @param code error code
+     * @param message error message
+     * @param data error data
+     * @param <T> data type
+     * @return Result object
+     */
+    public static <T> Result<T> error(int code, String message, T data) {
+        return new Result<>(code, message, data, System.currentTimeMillis());
     }
     
     /**

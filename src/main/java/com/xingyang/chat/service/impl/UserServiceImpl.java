@@ -74,11 +74,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
         );
         
-        // Generate JWT token
-        String token = jwtTokenUtil.generateToken(authentication);
-        
         // Get user information
         User user = getUserByUsername(loginDTO.getUsername());
+        
+        // Generate JWT token with user ID
+        String token = jwtTokenUtil.generateToken(authentication, user.getId());
         
         // Update last login time
         user.setLastLoginTime(new Date());
