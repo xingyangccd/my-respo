@@ -8,14 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 /**
- * Captcha Configuration
+ * Captcha Configuration (Deprecated - Using Hutool CaptchaUtil instead) 
  *
  * @author XingYang
  */
-@Configuration
+// @Configuration
 public class CaptchaConfig {
 
-    @Bean
+    // @Bean
     public DefaultKaptcha captchaProducer() {
         DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
         Properties properties = new Properties();

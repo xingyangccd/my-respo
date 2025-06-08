@@ -26,9 +26,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*")
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .allowCredentials(true)
                 .maxAge(3600);
     }
 
@@ -41,8 +42,8 @@ public class WebConfig implements WebMvcConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // 允许所有源
-        config.addAllowedOrigin("*");
+        // 使用allowedOriginPatterns而不是allowedOrigin
+        config.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
         
         // 允许所有头信息
         config.addAllowedHeader("*");
@@ -51,7 +52,7 @@ public class WebConfig implements WebMvcConfigurer {
         config.addAllowedMethod("*");
         
         // 允许Cookie等凭证
-        config.setAllowCredentials(false);  // 当allowedOrigin为"*"时，必须设置为false
+        config.setAllowCredentials(true);  // 使用allowedOriginPatterns可以同时设置为true
         
         // 预检请求的有效期，单位为秒
         config.setMaxAge(3600L);

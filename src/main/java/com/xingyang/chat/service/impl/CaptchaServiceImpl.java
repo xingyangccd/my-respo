@@ -1,6 +1,7 @@
 package com.xingyang.chat.service.impl;
 
-import com.google.code.kaptcha.Producer;
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
 import com.xingyang.chat.service.CaptchaService;
 import com.xingyang.chat.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Captcha Service Implementation
+ * Captcha Service Implementation using Hutool
  *
  * @author XingYang
  */
@@ -21,37 +22,44 @@ import java.util.concurrent.TimeUnit;
 public class CaptchaServiceImpl implements CaptchaService {
 
     @Autowired
-    private Producer captchaProducer;
-
-    @Autowired
     private RedisService redisService;
 
     @Value("${captcha.expiration:5}")
     private long captchaExpiration;
 
     private static final String CAPTCHA_CODE_KEY = "captcha:code:";
+    
+    // 验证码图片宽度
+    private static final int WIDTH = 160;
+    // 验证码图片高度
+    private static final int HEIGHT = 60;
+    // 验证码字符数
+    private static final int CODE_COUNT = 4;
 
     @Override
     public BufferedImage generateCaptcha(String uuid) {
         log.info("Generating captcha for UUID: {}", uuid);
         
-        // Generate captcha text
-        String captchaText = captchaProducer.createText();
-        log.info("Generated captcha text: {}", captchaText);
-        
-        // Store the captcha text in Redis with expiration
-        String key = CAPTCHA_CODE_KEY + uuid;
-        boolean stored = redisService.setCacheObject(key, captchaText, captchaExpiration, TimeUnit.MINUTES);
-        log.info("Stored captcha in Redis with key: {}, expiration: {} minutes, success: {}", 
-                key, captchaExpiration, stored);
-        
-        // Generate the captcha image using the text
-        BufferedImage image = captchaProducer.createImage(captchaText);
-        log.info("Generated captcha image, width: {}, height: {}", 
-                  image != null ? image.getWidth() : "null", 
-                  image != null ? image.getHeight() : "null");
-        
-        return image;
+        try {
+            // 使用hutool的CaptchaUtil生成线条干扰验证码
+            LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(WIDTH, HEIGHT, CODE_COUNT, 150);
+            
+            // 获取验证码文本
+            String captchaText = lineCaptcha.getCode();
+            log.info("Generated captcha text: {}", captchaText);
+            
+            // 存储验证码到Redis
+            String key = CAPTCHA_CODE_KEY + uuid;
+            boolean stored = redisService.setCacheObject(key, captchaText, captchaExpiration, TimeUnit.MINUTES);
+            log.info("Stored captcha in Redis with key: {}, expiration: {} minutes, success: {}", 
+                    key, captchaExpiration, stored);
+            
+            // 返回验证码图片
+            return lineCaptcha.getImage();
+        } catch (Exception e) {
+            log.error("Error generating captcha with Hutool: {}", e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override

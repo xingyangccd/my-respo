@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `user_role` (
 CREATE TABLE IF NOT EXISTS `model` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key ID',
   `name` varchar(50) NOT NULL COMMENT 'Model name',
-  `provider` varchar(50) NOT NULL COMMENT 'Model provider (e.g., OpenAI, DeepSeek)',
+  `provider` varchar(50) NOT NULL COMMENT 'Model provider (e.g., OpenAI, SmartAI)',
   `type` varchar(20) NOT NULL COMMENT 'Model type (text, image, audio)',
   `endpoint` varchar(255) DEFAULT NULL COMMENT 'API endpoint',
   `model_version` varchar(50) DEFAULT NULL COMMENT 'Model version',

@@ -19,7 +19,7 @@ public class Model extends BaseEntity {
     @Schema(description = "Model name")
     private String name;
     
-    @Schema(description = "Model provider (e.g., OpenAI, DeepSeek)")
+    @Schema(description = "Model provider (e.g., OpenAI, SmartAI)")
     private String provider;
     
     @Schema(description = "Model type (text, image, audio)")

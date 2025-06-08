@@ -17,11 +17,11 @@ VALUES (1, 1, NOW(), NOW());
 
 -- Insert AI models
 INSERT INTO `model` (name, provider, type, endpoint, model_version, token_limit, avatar, default_params, status, sort, create_time, update_time)
-VALUES ('DeepSeek Chat', 'DeepSeek', 'text', 'api/v1/chat/completions', 'v1', 8192, 'https://example.com/deepseek.png', 
+VALUES ('SmartAI Chat', 'SmartAI', 'text', 'api/v1/chat/completions', 'v1', 8192, 'https://example.com/deepseek.png', 
         '{"temperature": 0.7, "top_p": 0.9, "max_tokens": 2048}', 1, 1, NOW(), NOW());
 
 INSERT INTO `model` (name, provider, type, endpoint, model_version, token_limit, avatar, default_params, status, sort, create_time, update_time)
-VALUES ('DeepSeek Coder', 'DeepSeek', 'text', 'api/v1/chat/completions', 'v1', 8192, 'https://example.com/deepseek-coder.png', 
+VALUES ('SmartAI Coder', 'SmartAI', 'text', 'api/v1/chat/completions', 'v1', 8192, 'https://example.com/deepseek-coder.png', 
         '{"temperature": 0.5, "top_p": 0.95, "max_tokens": 4096}', 1, 2, NOW(), NOW());
 
 INSERT INTO `model` (name, provider, type, endpoint, model_version, token_limit, avatar, default_params, status, sort, create_time, update_time)
@@ -37,4 +37,4 @@ INSERT INTO `message` (conversation_id, content, role, token_count, type, create
 VALUES (1, 'Hello, can you introduce yourself?', 'user', 10, 'text', NOW(), NOW(), 1);
 
 INSERT INTO `message` (conversation_id, content, role, token_count, type, parent_id, create_time, update_time, create_by)
-VALUES (1, 'Hello! I am DeepSeek, an advanced AI assistant designed to provide helpful, harmless, and honest responses to your questions and requests. I can assist with a wide range of tasks including answering questions, generating creative content, providing information, and having thoughtful conversations. How can I help you today?', 'assistant', 62, 'text', 1, NOW(), NOW(), 1); 
+VALUES (1, 'Hello! I am SmartAI, an advanced AI assistant designed to provide helpful, harmless, and honest responses to your questions and requests. I can assist with a wide range of tasks including answering questions, generating creative content, providing information, and having thoughtful conversations. How can I help you today?', 'assistant', 62, 'text', 1, NOW(), NOW(), 1); 
