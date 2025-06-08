@@ -35,7 +35,7 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "Authentication API", description = "Authentication endpoints for login, registration, and user information")
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private final UserService userService;
@@ -61,15 +61,21 @@ public class AuthController {
     })
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Parameter(description = "Login credentials", required = true) @Validated @RequestBody LoginDTO loginDTO) {
-        log.info("User login: {}", loginDTO.getUsername());
+        log.info("User login attempt: {}", loginDTO.getUsername());
+        log.info("Login request captcha details - UUID: {}, Captcha: {}", loginDTO.getCaptchaUuid(), loginDTO.getCaptcha());
         
         // Validate captcha
         boolean isValidCaptcha = captchaService.validateCaptcha(loginDTO.getCaptchaUuid(), loginDTO.getCaptcha());
+        log.info("Captcha validation result for user {}: {}", loginDTO.getUsername(), isValidCaptcha);
+        
         if (!isValidCaptcha) {
+            log.warn("Login failed for user {} due to invalid captcha", loginDTO.getUsername());
             return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid captcha");
         }
         
+        log.info("Captcha validation successful, proceeding with authentication for user: {}", loginDTO.getUsername());
         Map<String, Object> result = userService.login(loginDTO);
+        log.info("Login successful for user: {}", loginDTO.getUsername());
         return Result.success("Login successful", result);
     }
 

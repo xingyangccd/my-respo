@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @author XingYang
  */
 @RestController
-@RequestMapping("/api/auth/email")
+@RequestMapping("/auth/email")
 @Tag(name = "Email API", description = "Email verification related endpoints")
 @RequiredArgsConstructor
 @Slf4j

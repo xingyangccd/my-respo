@@ -69,30 +69,32 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring Spring Security filter chain");
         
-        // Explicitly permit captcha endpoints first
-        http.authorizeRequests()
-            .antMatchers("/captcha/**").permitAll();
-        
+        // 确保先禁用CSRF保护和启用CORS
         http.csrf().disable()
-            .cors().configurationSource(corsConfigurationSource())
-            .and()
+            .cors().configurationSource(corsConfigurationSource()).and()
             .exceptionHandling()
             .authenticationEntryPoint(jwtAuthenticationEntryPoint)
             .accessDeniedHandler(jwtAccessDeniedHandler)
             .and()
             .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests()
-            // Public endpoints - no authentication required
-            .antMatchers("/captcha/**").permitAll() // Duplicate for emphasis
-            .antMatchers("/auth/**").permitAll()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        // 明确允许公共端点
+        http.authorizeRequests()
+            // 注意：由于使用了/api作为context-path，以下所有路径都会自动加上/api前缀
+            .antMatchers("/auth/login").permitAll()
+            .antMatchers("/auth/register").permitAll()
+            .antMatchers("/auth/email/**").permitAll() // 允许邮箱验证相关的端点未认证访问
+            .antMatchers("/captcha/**").permitAll()
             .antMatchers("/register").permitAll()
             .antMatchers("/public/**").permitAll()
-            // All other endpoints require authentication
+            // 处理意外情况：如果前端仍然发送/api/api/...的请求
+            .antMatchers("/api/auth/email/**").permitAll() // 显式允许双重前缀的路径
+            .antMatchers("/api/captcha/**").permitAll() // 显式允许双重前缀的路径
+            // 所有其他请求需要认证
             .anyRequest().authenticated();
 
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        // 添加JWT过滤器
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         log.info("Spring Security filter chain configured successfully");
@@ -112,7 +114,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));

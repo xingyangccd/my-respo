@@ -33,20 +33,21 @@ public class CaptchaServiceImpl implements CaptchaService {
 
     @Override
     public BufferedImage generateCaptcha(String uuid) {
-        log.debug("Generating captcha for UUID: {}", uuid);
+        log.info("Generating captcha for UUID: {}", uuid);
         
         // Generate captcha text
         String captchaText = captchaProducer.createText();
-        log.debug("Generated captcha text: {}", captchaText);
+        log.info("Generated captcha text: {}", captchaText);
         
         // Store the captcha text in Redis with expiration
         String key = CAPTCHA_CODE_KEY + uuid;
-        redisService.setCacheObject(key, captchaText, captchaExpiration, TimeUnit.MINUTES);
-        log.debug("Stored captcha in Redis with key: {}, expiration: {} minutes", key, captchaExpiration);
+        boolean stored = redisService.setCacheObject(key, captchaText, captchaExpiration, TimeUnit.MINUTES);
+        log.info("Stored captcha in Redis with key: {}, expiration: {} minutes, success: {}", 
+                key, captchaExpiration, stored);
         
         // Generate the captcha image using the text
         BufferedImage image = captchaProducer.createImage(captchaText);
-        log.debug("Generated captcha image, width: {}, height: {}", 
+        log.info("Generated captcha image, width: {}, height: {}", 
                   image != null ? image.getWidth() : "null", 
                   image != null ? image.getHeight() : "null");
         
@@ -56,31 +57,38 @@ public class CaptchaServiceImpl implements CaptchaService {
     @Override
     public boolean validateCaptcha(String uuid, String captchaCode) {
         if (uuid == null || captchaCode == null) {
-            log.warn("UUID or captcha code is null");
+            log.warn("UUID or captcha code is null, uuid: {}, captchaCode: {}", uuid, captchaCode);
             return false;
         }
         
-        log.debug("Validating captcha for UUID: {}", uuid);
+        log.info("Validating captcha for UUID: {}, code: {}", uuid, captchaCode);
         
-        // Get the stored captcha code from Redis
-        String key = CAPTCHA_CODE_KEY + uuid;
-        String storedCaptchaCode = redisService.getCacheObject(key);
-        
-        if (storedCaptchaCode == null) {
-            log.warn("No captcha found in Redis for UUID: {}", uuid);
+        try {
+            // Get the stored captcha code from Redis
+            String key = CAPTCHA_CODE_KEY + uuid;
+            String storedCaptchaCode = redisService.getCacheObject(key);
+            
+            if (storedCaptchaCode == null) {
+                log.warn("No captcha found in Redis for UUID: {}", uuid);
+                return false;
+            }
+            
+            log.info("Retrieved captcha from Redis: {}", storedCaptchaCode);
+            
+            // Delete the captcha code from Redis after retrieving (one-time use)
+            boolean deleted = redisService.deleteObject(key);
+            log.info("Deleted captcha from Redis for UUID: {}, success: {}", uuid, deleted);
+            
+            // Case insensitive comparison - 清理输入验证码中的空格
+            captchaCode = captchaCode.trim();
+            boolean result = storedCaptchaCode.equalsIgnoreCase(captchaCode);
+            log.info("Captcha validation result for UUID {}: {}, stored: '{}', received: '{}'", 
+                    uuid, result, storedCaptchaCode, captchaCode);
+            
+            return result;
+        } catch (Exception e) {
+            log.error("Error validating captcha: {}", e.getMessage(), e);
             return false;
         }
-        
-        log.debug("Retrieved captcha from Redis: {}", storedCaptchaCode);
-        
-        // Delete the captcha code from Redis after retrieving (one-time use)
-        redisService.deleteObject(key);
-        log.debug("Deleted captcha from Redis for UUID: {}", uuid);
-        
-        // Case insensitive comparison
-        boolean result = storedCaptchaCode.equalsIgnoreCase(captchaCode);
-        log.debug("Captcha validation result: {}", result);
-        
-        return result;
     }
 } 

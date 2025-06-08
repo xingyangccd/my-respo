@@ -38,7 +38,7 @@ public class EmailServiceImpl implements EmailService {
     private String emailNickname;
 
     // Verification code expiration time (seconds)
-    private static final long CODE_EXPIRE_SECONDS = 300;
+    private static final long CODE_EXPIRE_SECONDS = 600; // 10分钟
 
     // Redis key prefix
     private static final String EMAIL_CODE_PREFIX = "email:code:";

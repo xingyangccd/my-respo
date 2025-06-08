@@ -18,8 +18,9 @@ public interface RedisService {
      *
      * @param key   缓存的键值
      * @param value 缓存的值
+     * @return 是否成功
      */
-    <T> void setCacheObject(final String key, final T value);
+    <T> boolean setCacheObject(final String key, final T value);
 
     /**
      * 缓存基本的对象，Integer、String、实体类等，并设置过期时间
@@ -28,8 +29,9 @@ public interface RedisService {
      * @param value    缓存的值
      * @param timeout  时间
      * @param timeUnit 时间颗粒度
+     * @return 是否成功
      */
-    <T> void setCacheObject(final String key, final T value, final long timeout, final TimeUnit timeUnit);
+    <T> boolean setCacheObject(final String key, final T value, final long timeout, final TimeUnit timeUnit);
 
     /**
      * 获取缓存的基本对象

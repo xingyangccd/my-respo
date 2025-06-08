@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +13,13 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 
 /**
@@ -23,12 +27,44 @@ import java.time.Duration;
  *
  * @author XingYang
  */
+@Slf4j
 @Configuration
 @EnableCaching
 public class RedisConfig {
 
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+    
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @PostConstruct
+    public void init() {
+        try {
+            // 测试Redis连接
+            String testKey = "test:connection";
+            String testValue = "Connected at " + System.currentTimeMillis();
+            
+            stringRedisTemplate.opsForValue().set(testKey, testValue);
+            String retrievedValue = stringRedisTemplate.opsForValue().get(testKey);
+            
+            if (retrievedValue != null && retrievedValue.equals(testValue)) {
+                log.info("Redis connection test successful");
+            } else {
+                log.warn("Redis connection test failed - value mismatch");
+            }
+            
+            // 清理测试键
+            stringRedisTemplate.delete(testKey);
+            
+        } catch (Exception e) {
+            log.error("Redis connection test failed: {}", e.getMessage(), e);
+        }
+    }
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        log.info("Initializing Redis template");
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
         
@@ -47,11 +83,13 @@ public class RedisConfig {
         template.setHashValueSerializer(jackson2JsonRedisSerializer);
         
         template.afterPropertiesSet();
+        log.info("Redis template initialized successfully");
         return template;
     }
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
+        log.info("Initializing Redis cache manager");
         RedisSerializer<String> redisSerializer = new StringRedisSerializer();
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = getJackson2JsonRedisSerializer();
         
@@ -62,9 +100,12 @@ public class RedisConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jackson2JsonRedisSerializer))
                 .disableCachingNullValues();
         
-        return RedisCacheManager.builder(factory)
+        RedisCacheManager cacheManager = RedisCacheManager.builder(factory)
                 .cacheDefaults(config)
                 .build();
+        
+        log.info("Redis cache manager initialized successfully");
+        return cacheManager;
     }
     
     private Jackson2JsonRedisSerializer<Object> getJackson2JsonRedisSerializer() {
