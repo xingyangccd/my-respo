@@ -101,9 +101,10 @@ jwt:
 # MinIO Configuration
 minio:
   endpoint: http://localhost:9000
-  accessKey: minioadmin
-  secretKey: minioadmin
-  bucketName: hd-chat
+  accessKey: minio
+  secretKey: minio123
+  bucketName: ai-pan
+  avatarBucketName: avatar
 
 # Logging Configuration
 logging:

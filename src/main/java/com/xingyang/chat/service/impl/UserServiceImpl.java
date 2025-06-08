@@ -174,10 +174,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserVO updateUserInfo(UserUpdateDTO userUpdateDTO) {
-        // Check if user exists
-        User user = getById(userUpdateDTO.getId());
-        if (user == null) {
-            throw new BusinessException(Result.ResultCode.NOT_FOUND.getCode(), "User not found");
+        // Get current user if no ID is provided
+        User user;
+        if (userUpdateDTO.getId() == null) {
+            UserVO currentUser = getCurrentUser();
+            user = getById(currentUser.getId());
+            
+            if (user == null) {
+                throw new BusinessException(Result.ResultCode.NOT_FOUND.getCode(), "User not found");
+            }
+        } else {
+            // Check if user exists
+            user = getById(userUpdateDTO.getId());
+            if (user == null) {
+                throw new BusinessException(Result.ResultCode.NOT_FOUND.getCode(), "User not found");
+            }
         }
         
         // Update user info

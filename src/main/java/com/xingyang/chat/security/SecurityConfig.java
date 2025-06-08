@@ -54,13 +54,14 @@ public class SecurityConfig {
         return (web) -> {
             web.ignoring()
                .antMatchers(
-                   "/captcha/**",  
-                   "/doc.html", 
-                   "/swagger-ui/**", 
-                   "/swagger-resources/**", 
-                   "/v3/api-docs/**", 
-                   "/webjars/**"
-               );
+                "/captcha/**",
+                "/doc.html",
+                "/swagger-ui/**",
+                "/swagger-resources/**",
+                "/v3/api-docs/**",
+                "/webjars/**",
+                "/favicon.ico"
+            );
             log.info("Web security configured to ignore paths: [/captcha/**, /doc.html, /swagger-ui/**, etc]");
         };
     }
@@ -73,27 +74,21 @@ public class SecurityConfig {
         http.csrf().disable()
             .cors().configurationSource(corsConfigurationSource()).and()
             .exceptionHandling()
-            .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-            .accessDeniedHandler(jwtAccessDeniedHandler)
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
             .and()
             .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // 明确允许公共端点
         http.authorizeRequests()
             // 注意：由于使用了/api作为context-path，以下所有路径都会自动加上/api前缀
-            .antMatchers("/auth/login").permitAll()
-            .antMatchers("/auth/register").permitAll()
-            .antMatchers("/auth/email/**").permitAll() // 允许邮箱验证相关的端点未认证访问
+            .antMatchers("/auth/login", "/auth/register", "/auth/email/**").permitAll()
             .antMatchers("/captcha/**").permitAll()
-            .antMatchers("/register").permitAll()
             .antMatchers("/public/**").permitAll()
-            // 处理意外情况：如果前端仍然发送/api/api/...的请求
-            .antMatchers("/api/auth/email/**").permitAll() // 显式允许双重前缀的路径
-            .antMatchers("/api/captcha/**").permitAll() // 显式允许双重前缀的路径
             // 所有其他请求需要认证
             .anyRequest().authenticated();
-
+                
         // 添加JWT过滤器
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         

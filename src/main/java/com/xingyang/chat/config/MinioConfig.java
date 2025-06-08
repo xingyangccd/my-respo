@@ -26,6 +26,9 @@ public class MinioConfig {
 
     @Value("${minio.bucketName}")
     private String bucketName;
+    
+    @Value("${minio.avatarBucketName}")
+    private String avatarBucketName;
 
     @Bean
     public MinioClient minioClient() {
