@@ -105,11 +105,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Username already exists");
         }
         
-        // Check email format - must be QQ email
-        if (!registerDTO.getEmail().matches("^[1-9]\\d{4,}@qq\\.com$")) {
-            throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Please enter a valid QQ email address");
-        }
-        
         // Check if email already exists
         User existingEmail = lambdaQuery()
                 .eq(User::getEmail, registerDTO.getEmail())
@@ -123,11 +118,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!Objects.equals(registerDTO.getPassword(), registerDTO.getConfirmPassword())) {
             throw new BusinessException(Result.ResultCode.PARAM_ERROR.getCode(), "Passwords do not match");
         }
-        
-        // Check email verification code (handled in the controller)
-        // This will verify the email code:
-        // EmailService.verifyCode(registerDTO.getEmail(), registerDTO.getEmailCode());
-        // The controller should validate the code before this method is called
         
         // Create new user
         User user = new User();

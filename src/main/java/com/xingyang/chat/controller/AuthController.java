@@ -91,12 +91,6 @@ public class AuthController {
             return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid captcha");
         }
         
-        // Validate email verification code
-        boolean isValidEmailCode = emailService.verifyCode(registerDTO.getEmail(), registerDTO.getEmailCode());
-        if (!isValidEmailCode) {
-            return Result.error(Result.ResultCode.PARAM_ERROR.getCode(), "Invalid or expired email verification code");
-        }
-        
         UserVO user = userService.register(registerDTO);
         return Result.success("Registration successful", user);
     }

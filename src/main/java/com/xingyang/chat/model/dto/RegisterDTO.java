@@ -41,14 +41,7 @@ public class RegisterDTO implements Serializable {
     @Schema(description = "Email", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Invalid email format")
-    @Pattern(regexp = "^[1-9]\\d{4,}@qq\\.com$", message = "Please enter a valid QQ email address")
     private String email;
-
-    @Schema(description = "Email verification code", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Email verification code cannot be empty")
-    @Size(min = 6, max = 6, message = "Email verification code must be 6 digits")
-    @Pattern(regexp = "^\\d{6}$", message = "Email verification code must contain only digits")
-    private String emailCode;
 
     @Schema(description = "Phone number")
     @Pattern(regexp = "^$|^1[3-9]\\d{9}$", message = "Invalid phone number format")
