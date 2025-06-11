@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         description = "REST API documentation for HD Chat Application"
     )
 )
+
+
 @SpringBootApplication
 @MapperScan("com.xingyang.chat.mapper")
 @EnableTransactionManagement

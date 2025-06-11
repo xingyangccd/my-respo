@@ -22,7 +22,7 @@ public class EmailSendDTO implements Serializable {
     @Schema(description = "Email address", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Invalid email format")
-    @Pattern(regexp = "3266303694@qq\\.com$", message = "Please enter a valid QQ email address")
+    @Pattern(regexp = "^[1-9]\\d{4,}@qq\\.com$", message = "Please enter a valid QQ email address")
     private String email;
 
     @Schema(description = "Verification type (register, reset)", requiredMode = Schema.RequiredMode.REQUIRED)
